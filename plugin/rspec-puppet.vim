@@ -1,3 +1,8 @@
+function Cd_back()
+  let cd_back = 'cd ' . s:old_path
+  exec cd_back
+endfunction
+
 function! Run_Rspec_Cmd(location)
   " If a list of paths was passed, turn it into a space separated string
   if type(a:location) == 3
@@ -51,7 +56,7 @@ function! Find_And_Run_Spec_File()
   let spec_dir = finddir('spec', ';' . repo_root . ';')
   if empty(spec_dir)
     echo "Couldn't find a spec dir"
-    exe cd_back
+    call s:Cd_back()
     return
   endif
 
@@ -64,8 +69,8 @@ function! Find_And_Run_Spec_File()
   if empty(class_name)
     echom 'Could not determine the class name in ' . expand('%:p')
 
-    call Run_Rspec_Cmd('spec')
-    exe cd_back
+    call s:Run_Rspec_Cmd('spec')
+    call s:Cd_back()
     return
   end
 
@@ -75,15 +80,15 @@ function! Find_And_Run_Spec_File()
   let spec_path_base = ['spec', 'classes', join(class_name_pieces[1:-1], '/')]
   let full_path = join(spec_path_base, '/') . '_spec.rb'
   if filereadable(full_path)
-    call Run_Rspec_Cmd(full_path)
-    exe cd_back
+    call s:Run_Rspec_Cmd(full_path)
+    call s:Cd_back()
     return
   endif
 
   let rg_exists = system('which rg')
   if v:shell_error != 0
     echom "Can't find the 'rg' binary in the binary paths"
-    exe cd_back
+    call s:Cd_back()
     return
   endif
 
@@ -102,7 +107,7 @@ function! Find_And_Run_Spec_File()
   else
     " In almost all cases the class we're testing should only have one
     " file, but if there are several, Run_Rspec_Cmd will call them all.
-    call Run_Rspec_Cmd(split(specs, "\n"))
+    call s:Run_Rspec_Cmd(split(specs, "\n"))
   endif
 
   " Return to where we were
@@ -124,18 +129,18 @@ function! Run_Spec()
   if ! empty(match)
     " cd to the repo root
     exe 'cd ' . repo_root
-    call Run_Rspec_Cmd(expand('%'))
+    call s:Run_Rspec_Cmd(expand('%'))
 
     " Return to where we were
-    exe 'cd ' . old_path
+    call s:Cd_back()
 
     " Stop
     return
   endif
 
   " It's not a spec file, so try to run the most specific spec file
-  call Find_And_Run_Spec_File()
+  call s:Find_And_Run_Spec_File()
 
   " Return to where we were
-  exe 'cd ' . old_path
+  call s:Cd_back()
 endfunction
