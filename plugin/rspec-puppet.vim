@@ -110,7 +110,9 @@ function! Find_And_Run_Spec_File()
 endfunction
 
 function! Run_Spec()
-  let old_path = getcwd()
+  let s:old_path = getcwd()
+  let s:cd_back = 'cd ' . s:old_path
+
   let repo_root = system('git rev-parse --show-toplevel')
   if empty(repo_root)
     echo "Couldn't find the repo root. It's not a git repo?"
