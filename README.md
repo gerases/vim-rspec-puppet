@@ -10,11 +10,10 @@ The plugin handles two basic cases:
 
 # Install
 <to be documented>
-Install using https://github.com/junegunn/vim-plug or something similar.
-
+Install using https://github.com/junegunn/vim-plug or another vim plugin system. If you don't have a plugin system (you really should), put the file in a location that is sourced by Vim such as `~/.vim/plugin`.
+ 
 # Use
 Create a binding of your choice. For example:
-
 ```
 " Run rspec
 nnoremap <leader>rs :call Run_Spec()<CR>
