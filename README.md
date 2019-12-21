@@ -27,3 +27,4 @@ nnoremap <leader>rs :call Run_Spec()<CR>
 
 * Git
 * Ripgrep (https://github.com/BurntSushi/ripgrep)
+* Vim >= 8.1
