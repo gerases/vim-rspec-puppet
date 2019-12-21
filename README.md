@@ -7,9 +7,8 @@ two basic cases:
 * If you're in a spec file, and invoke `Run_Spec()`, it will run the spec file.
 * If you're in a puppet manifest:
   * it will try to find the closest spec file upward of the file and run it.
-  * failing find the spec file, it will offer to grep through the closest sepc
-    directory in an attempt to find the spec file that tests the puppet file
-    one is in.
+  * failing find the spec file, it will offer to grep through the closest spec
+    directory.
 
 # Install
 <to be documented>
