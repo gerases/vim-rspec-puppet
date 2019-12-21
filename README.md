@@ -20,7 +20,7 @@ Create a binding of your choice. For example:
 
 ```
 " Run rspec
-nnoremap <leader>t :call Run_Spec()<CR>
+nnoremap <leader>rs :call Run_Spec()<CR>
 ```
 
 # Dependencies
