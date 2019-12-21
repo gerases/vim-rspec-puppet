@@ -4,10 +4,9 @@ A vim plugin for working with rspec-puppet. It's not a plugin for working with r
 The plugin handles two basic cases:
 
 * If you're in a spec file, and invoke `Run_Spec()`, it will run the spec file.
-* If you're in a puppet manifest:
-  * it will try to find the closest spec file upward of the file and run it.
-  * failing find the spec file, it will offer to grep through the closest spec
-    directory.
+* If you're in a puppet manifest (this is the special case making the puppet situation more unique):
+  * it will try to extract the class name and find the closest spec file testing that class.
+  * failing find the spec file, it will offer to grep through the closest spec directory.
 
 # Install
 <to be documented>
