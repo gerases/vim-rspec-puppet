@@ -1,8 +1,7 @@
 # vim-rspec-puppet
 A vim plugin for working with rspec-puppet. It's not a plugin for working with rspec more generally because it focuses specifically on puppet code, whose file structure is unique enough to warrant special treatment.
 
-This is an attempt to facilitate running rspec-puppet tests from Vim. It handles
-two basic cases:
+The plugin handles two basic cases:
 
 * If you're in a spec file, and invoke `Run_Spec()`, it will run the spec file.
 * If you're in a puppet manifest:
