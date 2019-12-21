@@ -14,7 +14,6 @@ Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim pl
 # Use
 Create a binding of your choice. For example:
 ```
-" Run rspec
 nnoremap <leader>rs :call Run_Spec()<CR>
 ```
 
