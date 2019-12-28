@@ -44,6 +44,8 @@ function! s:Find_Spec_File_From_Puppet_Manifest()
   endif
 
   let line_contents = getline(line_no)
+
+  " Extract the name of the class
   let class_name = matchstr(line_contents, 'class \zs[a-zA-Z0-9_:]\+\ze')
   if class_name == ''
     return
