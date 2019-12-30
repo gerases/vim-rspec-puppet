@@ -143,7 +143,10 @@ function! Run_Spec(test_mode)
     " It's a puppet manifest. Try to find the the spec(s) for it
     call s:Find_And_Run_Spec_File()
   elseif matchstr(expand('%:p'), '_spec.rb$') != ""
-    " We have a real spec file
+    " We have a real spec file. To be pedantic, we shouldn't cd all the way to
+    " the repo root, but just to the directory directly above the spec
+    " directory of this file, but it's quicker to cd to the repo root and use
+    " the absolute path to the spec file.
     exe 'cd ' . s:repo_root
     call s:Run_Rspec_Cmd(expand('%:p'))
   else
