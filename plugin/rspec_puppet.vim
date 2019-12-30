@@ -2,14 +2,6 @@
 " Local functions
 " ===============
 function! s:Set_Up()
-  let s:old_path  = getcwd()
-  let s:cd_back   = 'cd ' . s:old_path
-
-  let s:repo_root = system('git rev-parse --show-toplevel')
-  if empty(s:repo_root)
-    echo "Couldn't find the repo root. It's not a git repo?"
-    return
-  endif
 endfunction
 
 function! s:Cd_back()
@@ -23,6 +15,12 @@ function! s:Run_Rspec_Cmd(location)
   " Otherwise, assume it's a string containing a single location
   else
     let spec_paths = a:location
+  endif
+
+  if s:test_mode == 1
+    let s:rspec_command = 'rspec -fd --fail-fast ' . spec_paths
+    call s:Cd_back()
+    return
   endif
 
   " Save the file
@@ -130,8 +128,16 @@ endfunction
 " =================
 " Global functions
 " =================
-function! Run_Spec()
-  call s:Set_Up()
+function! Run_Spec(test_mode)
+  let s:old_path = getcwd()
+  let s:cd_back  = 'cd ' . s:old_path
+  let s:test_mode = a:test_mode
+
+  let s:repo_root = system('git rev-parse --show-toplevel')
+  if empty(s:repo_root)
+    echo "Couldn't find the repo root. It's not a git repo?"
+    return
+  endif
 
   if matchstr(expand('%:p'), '[.]pp$') != ""
     " It's a puppet manifest. Try to find the the spec(s) for it
@@ -145,3 +151,14 @@ function! Run_Spec()
     return
   endif
 endfunction
+
+" begin vspec config
+function! rspec_puppet#scope()
+  return s:
+endfunction
+
+function! rspec_puppet#sid()
+    return maparg('<SID>', 'n')
+endfunction
+nnoremap <SID> <SID>
+" end vspec config
