@@ -2,9 +2,10 @@
 language: vim
 before_script:
   - wget https://github.com/kana/vim-vspec/tarball/master -O /tmp/vspec.tar.gz
-  - tar -xvf /tmp/vspec.tar.gz
-  - export PATH=$PATH:$PWD/vspec/bin
+  - mkdir vspec
+  - tar -xzvf /tmp/vspec.tar.gz --strip=1 -C vspec
 before_install:
   - sudo apt-get -y install vim
+  - vim --cmd ':version | :q'
 script:
-  - vspec t/rspec_puppet_test.vim
+  - vspec/bin/vspec t/rspec_puppet_test.vim
