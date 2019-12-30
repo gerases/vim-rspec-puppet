@@ -14,7 +14,7 @@ Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim pl
 # Use
 Create a binding of your choice. For example:
 ```
-nnoremap <leader>rs :call Run_Spec()<CR>
+nnoremap <leader>rs :call Run_Spec(0)<CR>
 ```
 
 # Dependencies
