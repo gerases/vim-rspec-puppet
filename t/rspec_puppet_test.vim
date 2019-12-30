@@ -37,25 +37,25 @@ describe "Rspec Runner"
   end
 
   it "works from within a spec file"
-    edit a_module/spec/classes/a_module_spec.rb
+    silent edit a_module/spec/classes/a_module_spec.rb
     call Call("Run_Spec", 1)
     Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/a_module/spec/classes/a_module_spec.rb'
   end
 
   it "works from within a component-module puppet file"
-    edit a_module/manifests/init.pp
+    silent edit a_module/manifests/init.pp
     call Call("Run_Spec", 1)
     Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/a_module_spec.rb'
   end
 
   it "works from within a 1-level-deep profile manifest"
-    edit profile/manifests/a.pp
+    silent edit profile/manifests/a.pp
     call Call("Run_Spec", 1)
     Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/a_spec.rb'
   end
 
   it "works from within a 3-level-deep profile manifest"
-    edit profile/manifests/b/c/d.pp
+    silent edit profile/manifests/b/c/d.pp
     call Call("Run_Spec", 1)
     Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/b/c/d_spec.rb'
   end
