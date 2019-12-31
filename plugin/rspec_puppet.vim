@@ -54,14 +54,14 @@ function! s:Find_Spec_File_From_Puppet_Manifest()
   return class_name
 endfunction
 
-function! s:Find_And_Run_Spec_File()
+function! s:Find_Nearest_Spec_Dir()
   " Cd to the directory of the file so we can search upward
   " :h removes the last component of the path
   cd %:h
 
   " Find the closest spec dir upward of the file until
-  " the root of the repo
-  let spec_dir = finddir('spec', ';' . s:repo_root . ';')
+  " the user's home directory
+  let spec_dir = finddir('spec', ';~')
   if empty(spec_dir)
     echo "Couldn't find a spec dir"
     call s:Cd_back()
@@ -71,12 +71,18 @@ function! s:Find_And_Run_Spec_File()
   " Cd to the found spec dir's parent so that we're at the same level as the
   " spec dir
   exe 'cd ' . spec_dir . '/..'
+  return 1
+endfunction
+
+function! s:Find_And_Run_Spec_File()
+  if s:Find_Nearest_Spec_Dir() != 1
+    return
+  endif
 
   " Try to get the spec files that test this class.
   let class_name = s:Find_Spec_File_From_Puppet_Manifest()
   if empty(class_name)
     echoerr 'Could not determine the class name in ' . expand('%:p')
-    call s:Run_Rspec_Cmd('spec')
     call s:Cd_back()
     return
   end
@@ -138,25 +144,26 @@ function! Run_Spec()
   let s:old_path = getcwd()
   let s:cd_back  = 'cd ' . s:old_path
 
-  let s:repo_root = system('git rev-parse --show-toplevel')
-  if empty(s:repo_root)
-    echo "Couldn't find the repo root. It's not a git repo?"
+  let l:is_puppet_manifest = 0
+  if matchstr(expand('%:p'), '[.]pp$') != ""
+    let l:is_puppet_manifest = 1
+  elseif matchstr(expand('%:p'), '_spec.rb$') == ""
+    echo "Not a puppet or rspec file"
     return
   endif
 
-  if matchstr(expand('%:p'), '[.]pp$') != ""
-    " It's a puppet manifest. Try to find the the spec(s) for it
-    call s:Find_And_Run_Spec_File()
-  elseif matchstr(expand('%:p'), '_spec.rb$') != ""
-    " We have a real spec file. To be pedantic, we shouldn't cd all the way to
-    " the repo root, but just to the directory directly above the spec
-    " directory of this file, but it's quicker to cd to the repo root and use
-    " the absolute path to the spec file.
-    exe 'cd ' . s:repo_root
-    call s:Run_Rspec_Cmd(expand('%:p'))
-  else
-    echom "Not a puppet or rspec file"
+  " Find the nearest spec dir and cd to it. This needs to be done for both
+  " puppet manifests and spec files.
+  if s:Find_Nearest_Spec_Dir() != 1
     return
+  endif
+
+  if l:is_puppet_manifest == 1
+    " It's a puppet manifest. Try to find the matching spec file.
+    call s:Find_And_Run_Spec_File()
+  else
+    " We have a real spec file - run it directly.
+    call s:Run_Rspec_Cmd(expand('%:p'))
   endif
 endfunction
 
