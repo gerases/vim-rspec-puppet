@@ -95,7 +95,7 @@ function! s:Find_And_Run_Spec_File()
   " Try to get the spec files that test this class.
   let class_name = s:Find_Spec_File_From_Puppet_Manifest()
   if empty(class_name)
-    echoerr 'Could not determine the class name in ' . expand('%:p')
+    echo 'Could not determine the class name in ' . expand('%:p')
     call s:Cd_back()
     return
   end
@@ -120,7 +120,7 @@ function! s:Find_And_Run_Spec_File()
   " If the above fails, we can try to grep with rg
   let rg_exists = system('which rg')
   if v:shell_error != 0
-    echoerr "Can't find the 'rg' binary in the binary paths"
+    echo "Can't find the 'rg' binary in the binary paths"
     call s:Cd_back()
     return
   endif
@@ -134,10 +134,11 @@ function! s:Find_And_Run_Spec_File()
   endif
 
   echo "\n"
+
   let specs = system("rg -lg '*_spec.rb' " . class_name . ' ' . spec_dir)
   " Grep for the class name under the spec dir
   if empty(specs)
-    echoerr 'Could not find mention of class ' . class_name . ' under ' . spec_dir
+    echo 'Could not find mention of class ' . class_name . ' under ' . spec_dir
   else
     " In almost all cases the class we're testing should only have one
     " file, but if there are several, Run_Rspec_Cmd will call them all.
