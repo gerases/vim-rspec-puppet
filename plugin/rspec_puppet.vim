@@ -14,7 +14,7 @@ function! s:Run_Rspec_Cmd(location)
     let spec_paths = a:location
   endif
 
-  if s:test_mode == 1
+  if exists("s:test_mode")
     let s:rspec_command = 'rspec -fd --fail-fast ' . spec_paths
     call s:Cd_back()
     return
