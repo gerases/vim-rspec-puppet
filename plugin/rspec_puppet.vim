@@ -120,6 +120,7 @@ function! s:Find_And_Run_Spec_File()
     return
   endif
 
+  echo "\n"
   let specs = system("rg -lg '*_spec.rb' " . class_name . ' ' . spec_dir)
   " Grep for the class name under the spec dir
   if empty(specs)
