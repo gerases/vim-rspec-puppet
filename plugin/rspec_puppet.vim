@@ -133,6 +133,8 @@ function! s:Find_And_Run_Spec_File()
     return
   endif
 
+  " Echo newline or next message (if any) will continue on the prompt line
+  " above
   echo "\n"
 
   let specs = system("rg -lg '*_spec.rb' " . class_name . ' ' . spec_dir)
