@@ -1,9 +1,6 @@
 " ===============
 " Local functions
 " ===============
-function! s:Set_Up()
-endfunction
-
 function! s:Cd_back()
   exec s:cd_back
 endfunction
