@@ -59,9 +59,22 @@ function! s:Find_Nearest_Spec_Dir()
   " :h removes the last component of the path
   cd %:h
 
+  " Holds the path to a directory beyond which the search should not continue
+  let l:stop_search_at = ""
+
+  call system('which git')
+  if v:shell_error == 0
+    let l:stop_search_at = system('git rev-parse --show-toplevel')
+  endif
+
+  " If we don't have a repo root, default to home dir
+  if l:stop_search_at == ""
+    let l:stop_search_at = '~'
+  endif
+
   " Find the closest spec dir upward of the file until
   " the user's home directory
-  let spec_dir = finddir('spec', ';~')
+  let spec_dir = finddir('spec', ';' . l:stop_search_at)
   if empty(spec_dir)
     echo "Couldn't find a spec dir"
     call s:Cd_back()
