@@ -21,3 +21,4 @@ nnoremap <leader>rs :call Run_Spec(0)<CR>
 * [vim-spec](https://github.com/kana/vim-vspec) (to run the tests)
 * Git
 * [Ripgrep](https://github.com/BurntSushi/ripgrep)
+* Vim >= 8.1
