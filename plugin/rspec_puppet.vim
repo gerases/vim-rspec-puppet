@@ -125,13 +125,16 @@ function! s:Find_And_Run_Spec_File()
   call s:Cd_back()
 endfunction
 
+function! s:turn_on_test_mode()
+  let s:test_mode = 1
+endfunction
+
 " =================
 " Global functions
 " =================
-function! Run_Spec(test_mode)
+function! Run_Spec()
   let s:old_path = getcwd()
   let s:cd_back  = 'cd ' . s:old_path
-  let s:test_mode = a:test_mode
 
   let s:repo_root = system('git rev-parse --show-toplevel')
   if empty(s:repo_root)
