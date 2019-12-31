@@ -73,7 +73,7 @@ function! s:Find_Nearest_Spec_Dir()
   endif
 
   " Find the closest spec dir upward of the file until
-  " the user's home directory
+  " the directory in stop_search_at.
   let spec_dir = finddir('spec', ';' . l:stop_search_at)
   if empty(spec_dir)
     echo "Couldn't find a spec dir"
