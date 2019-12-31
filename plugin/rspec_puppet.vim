@@ -152,8 +152,9 @@ function! Run_Spec()
     return
   endif
 
-  " Find the nearest spec dir and cd to it. This needs to be done for both
-  " puppet manifests and spec files.
+  " Find the nearest spec dir and cd to its parent.
+  " This needs to be done for both puppet manifests
+  " and spec files.
   if s:Find_Nearest_Spec_Dir() != 1
     return
   endif
