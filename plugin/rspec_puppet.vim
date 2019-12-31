@@ -23,6 +23,11 @@ function! s:Run_Rspec_Cmd(location)
   " Save the file
   exe "normal :w\<CR>"
 
+  if has('terminal') == 0
+    echo "No terminal support in this version of vim. Aborting"
+    return
+  endif
+
   " Run the rspec tests
   exe "normal :-tab terminal rspec -fd --fail-fast " . spec_paths . "\<CR>"
   call s:Cd_back()
