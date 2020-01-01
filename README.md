@@ -19,6 +19,14 @@ Create a binding of your choice. For example:
 nnoremap <leader>rs :call Run_Spec()<CR>
 ```
 
+You can press that key combination in either a puppet or spec file. In addition,
+you can define another binding to run rspec tests only against a specific line
+in the spec file. This can be done like so:
+
+```
+nnoremap <leader>rs :call Run_Spec(line('.'))<CR>
+```
+
 # Dependencies
 * [vim-spec](https://github.com/kana/vim-vspec) (to run the tests)
 * Git
