@@ -157,7 +157,7 @@ endfunction
 " =================
 " Global functions
 " =================
-function! Run_Spec()
+function! Run_Spec(...)
   let s:old_path = getcwd()
   let s:cd_back  = 'cd ' . s:old_path
 
@@ -177,11 +177,18 @@ function! Run_Spec()
   endif
 
   if l:is_puppet_manifest == 1
-    " It's a puppet manifest. Try to find the matching spec file.
+    " It's a puppet manifest - try to find the matching spec file.
     call s:Find_And_Run_Spec_File()
   else
-    " We have a real spec file - run it directly.
-    call s:Run_Rspec_Cmd(expand('%:p'))
+    let l:location = expand('%:p')
+    " We have a spec file - run it directly.
+    if a:0 > 0
+      " If we have a line number in the arguments, append it
+      " to the spec file name. Rspec will then run tests
+      " only for that line number.
+      let l:location = l:location . ':' . a:1
+    endif
+    call s:Run_Rspec_Cmd(l:location)
   endif
 endfunction
 
