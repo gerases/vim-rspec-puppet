@@ -8,14 +8,14 @@ endfunction
 function! s:Run_Rspec_Cmd(location)
   " If a list of paths was passed, turn it into a space separated string
   if type(a:location) == 3
-    let spec_paths = join(a:location, ' ')
+    let l:spec_paths = join(a:location, ' ')
   " Otherwise, assume it's a string containing a single location
   else
-    let spec_paths = a:location
+    let l:spec_paths = a:location
   endif
 
   if exists("s:test_mode")
-    let s:rspec_command = 'rspec -fd --fail-fast ' . spec_paths
+    let s:rspec_command = 'rspec -fd --fail-fast ' . l:spec_paths
     call s:Cd_back()
     return
   endif
@@ -29,7 +29,7 @@ function! s:Run_Rspec_Cmd(location)
   endif
 
   " Run the rspec tests
-  exe "normal :-tab terminal rspec -fd --fail-fast " . spec_paths . "\<CR>"
+  exe "normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
   call s:Cd_back()
 endfunction
 
