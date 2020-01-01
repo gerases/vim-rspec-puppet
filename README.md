@@ -11,7 +11,7 @@ The plugin handles two basic cases:
   * it will (failing to find the spec by the class name) offer to grep through the closest spec directory.
 
 # Install
-Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim plugin system. If you don't have a plugin system (you really should), put the file in a location that is sourced by Vim such as `~/.vim/plugin`.
+Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim plugin system. If you don't have a plugin system, put the file in a location that is sourced by Vim such as `~/.vim/plugin`.
 
 # Use
 Create a binding of your choice. For example:
