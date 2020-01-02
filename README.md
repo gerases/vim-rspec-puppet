@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/gerases/vim-rspec-puppet.svg?branch=master)](https://travis-ci.com/gerases/vim-rspec-puppet)
 
 # vim-rspec-puppet
-A vim plugin for working with rspec-puppet. It grew out of this great mapping suggested by [TheLocehiliosan(https://github.com/TheLocehiliosan):
+A vim plugin for working with rspec-puppet. It grew out of this great mapping suggested by [TheLocehiliosan](https://github.com/TheLocehiliosan):
 
 ```
 nnoremap rs :w:-tab terminal rspec -fd %
