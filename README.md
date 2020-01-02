@@ -9,6 +9,8 @@ The plugin handles two basic cases:
 * If you're in a puppet manifest (this is the special case making the puppet situation more unique):
   * it will try to extract the class name and find the closest spec file testing that class.
   * it will (failing to find the spec by the class name) offer to grep through the closest spec directory.
+  
+This is my first Vim plugin, so there could very well be things done contrary to the best Vim coding practices. If you notice something, I'll be glad to adjust the code accordingly. Really, all this code should be somehow integrated in the [existing](https://github.com/thoughtbot/vim-rspec/blob/master/plugin/rspec.vim) vim-rspec plugin, but I needed this fast for my needs.
 
 # Install
 Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim plugin system. If you don't have a plugin system, put the file in a location that is sourced by Vim such as `~/.vim/plugin`.
@@ -34,4 +36,4 @@ nnoremap <leader>rl :call Run_Spec_Line()<CR>
 * Vim >= 8.1 (because of the "terminal" capability in vim >= 8.1)
 
 # Acknowledgements
-Some of the ideas for the functionality were taken from this project: [vim-rspec](https://github.com/thoughtbot/vim-rspec/blob/master/plugin/rspec.vim)
+Some of the ideas for the functionality were taken from this project: [vim-rspec](https://github.com/thoughtbot/vim-rspec/blob/master/plugin/rspec.vim), especially the testing setup.
