@@ -192,6 +192,10 @@ function! Run_Spec(...)
   endif
 endfunction
 
+function! Run_Spec_Line()
+  Run_Spec(line('.'))
+endfunction
+
 " begin vspec config
 function! rspec_puppet#scope()
   return s:
