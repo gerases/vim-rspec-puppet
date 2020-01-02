@@ -24,7 +24,7 @@ you can define another binding to run rspec tests only against a specific line
 in the spec file. This can be done like so:
 
 ```
-nnoremap <leader>rsl :call Run_Spec_Line()<CR>
+nnoremap <leader>rl :call Run_Spec_Line()<CR>
 ```
 
 # Dependencies
