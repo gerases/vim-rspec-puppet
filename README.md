@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/gerases/vim-rspec-puppet.svg?branch=master)](https://travis-ci.com/gerases/vim-rspec-puppet)
 
 # vim-rspec-puppet
-A vim plugin for working with rspec-puppet. It's not a plugin for working with rspec more generally because it focuses specifically on puppet code, whose file structure is unique enough to warrant special treatment. The plugin also takes advantages of the terminal integration in Vim 8 by running the tests in a terminal tab.
+A vim plugin for working with rspec-puppet. It's not a plugin for working with rspec more generally because it focuses specifically on puppet code, whose file structure is unique enough to warrant special treatment. I wrote is specifically for siutuations where one is in charge not of just one puppet module but a puppet code base with multiple component modules, profiles and roles. The plugin also takes advantages of the terminal integration in Vim 8 by running the tests in a terminal tab, which makes examnining the results of a test a breeze.
 
 The plugin handles two basic cases:
 
@@ -37,4 +37,4 @@ nnoremap <leader>rl :call Run_Spec_Line()<CR>
 * Vim >= 8.1 (because of the "terminal" capability in vim >= 8.1)
 
 # Acknowledgements
-Some of the ideas for the functionality were taken from this project: [vim-rspec](https://github.com/thoughtbot/vim-rspec), especially the testing setup.
+Some of the ideas for the functionality were taken from this project: [vim-rspec](https://github.com/thoughtbot/vim-rspec), especially the testing setup. 
