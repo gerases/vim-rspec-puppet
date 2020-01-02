@@ -32,3 +32,6 @@ nnoremap <leader>rl :call Run_Spec_Line()<CR>
 * Git
 * [Ripgrep](https://github.com/BurntSushi/ripgrep)
 * Vim >= 8.1 (because of the "terminal" capability in vim >= 8.1)
+
+# Acknowledgements
+Some of the ideas for the functionality were taken from this project: [vim-rspec](https://github.com/thoughtbot/vim-rspec/blob/master/plugin/rspec.vim)
