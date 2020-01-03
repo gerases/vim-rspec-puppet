@@ -179,6 +179,22 @@ function! s:Find_And_Run_Spec_File()
   call s:Cd_back()
 endfunction
 
+function! s:Get_Buf_Type()
+  if &buftype != ''
+    return 0
+  endif
+
+  if matchstr(expand('%:p'), '[.]pp$') != ""
+    return 1
+  endif
+
+  if matchstr(expand('%:p'), '_spec.rb$') != ""
+    return 2
+  endif
+
+  return 0
+endfunction
+
 function! s:turn_on_test_mode()
   let s:test_mode = 1
 endfunction
@@ -190,10 +206,8 @@ function! Run_Spec(...)
   let s:old_path = getcwd()
   let s:cd_back  = 'cd ' . s:old_path
 
-  let l:is_puppet_manifest = 0
-  if matchstr(expand('%:p'), '[.]pp$') != ""
-    let l:is_puppet_manifest = 1
-  elseif matchstr(expand('%:p'), '_spec.rb$') == ""
+  let l:buffer_type = s:Get_Buf_Type()
+  if l:buffer_type == 0
     echo "Not a puppet or rspec file"
     return
   endif
@@ -205,7 +219,7 @@ function! Run_Spec(...)
     return
   endif
 
-  if l:is_puppet_manifest == 1
+  if l:buffer_type == 1
     " It's a puppet manifest - try to find the matching spec file.
     call s:Find_And_Run_Spec_File()
   else
