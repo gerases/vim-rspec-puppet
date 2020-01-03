@@ -15,7 +15,7 @@ function! s:FindAndCloseLastTerminalWindow()
       " * The job has finished (modifiable=0)
       " * The command starts with '!rspec'
       if getbufvar(bufnr, '&buftype') == 'terminal'
-        \ && getbufvar(bufnr, '&modifiable') == 0
+        \ && term_getstatus(bufnr) ==# 'finished'
         \ && match(bufname(bufnr), '^!rspec') != -1
         let l:winnr = bufwinnr(bufnr)
         exe ':' . l:winnr . 'close'
