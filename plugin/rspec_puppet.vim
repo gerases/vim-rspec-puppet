@@ -1,11 +1,40 @@
 " ===============
 " Local functions
 " ===============
+
+" Finds the tab/window containing the last rspec command and closes it
+function! s:FindAndCloseLastTerminalWindow()
+  let i = 1
+  let l:current_tab = tabpagenr()
+  while i <= tabpagenr('$')
+    exe 'normal ' . i . 'gt'
+    let buflist = tabpagebuflist(i)
+    for bufnr in buflist
+      " Before closing the tab with the terminal window, we check that:
+      " * The buffer loaded into the window is of type 'terminal'
+      " * The job has finished (modifiable=0)
+      " * The command starts with '!rspec'
+      if getbufvar(bufnr, '&buftype') == 'terminal'
+        \ && getbufvar(bufnr, '&modifiable') == 0
+        \ && match(bufname(bufnr), '^!rspec') != -1
+        let l:winnr = bufwinnr(bufnr)
+        exe ':' . l:winnr . 'close'
+      endif
+    endfor
+    let i = i + 1
+  endwhile
+
+  " Return to the remembered tab
+  exe 'normal ' . l:current_tab . 'gt'
+endfunction
+
 function! s:Cd_back()
   exec s:cd_back
 endfunction
 
 function! s:Run_Rspec_Cmd(location)
+  call s:FindAndCloseLastTerminalWindow()
+
   " If a list of paths was passed, turn it into a space separated string
   if type(a:location) == 3
     let l:spec_paths = join(a:location, ' ')

@@ -16,8 +16,10 @@ The plugin handles two basic cases:
 * If you're in a puppet manifest (this is the special case making the puppet situation more unique):
   * it will try to extract the class name and find the closest spec file testing that class.
   * it will (failing to find the spec by the class name) offer to grep through the closest spec directory.
-  
+
 This is my first Vim plugin, so there could very well be things done contrary to the best Vim coding practices. If you notice something, let me know or submit a PR. Really, all this code should be somehow integrated in the [existing](https://github.com/thoughtbot/vim-rspec) vim-rspec plugin, but I needed this fast for my needs. Maybe some time later I'll put together a PR into that project.
+
+Note, before running an `rspec` command, the plugin will try to find and close the tab with the previous run command.
 
 # Install
 Install using [vim-plug](https://github.com/junegunn/vim-plug) or another vim plugin system. If you don't have a plugin system, put the file in a location that is sourced by Vim such as `~/.vim/plugin`.
