@@ -236,7 +236,7 @@ function! Run_Spec(...)
 endfunction
 
 function! Run_Spec_Line()
-  Run_Spec(line('.'))
+  call Run_Spec(line('.'))
 endfunction
 
 " begin vspec config
