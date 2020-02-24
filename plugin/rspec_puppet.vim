@@ -166,7 +166,7 @@ function! s:Find_And_Run_Spec_File()
   " above
   echo "\n"
 
-  let specs = system("rg -lg '*_spec.rb' " . class_name . ' ' . spec_dir)
+  let specs = system("rg -lg '*_spec.rb' " . class_name)
   " Grep for the class name under the spec dir
   if empty(specs)
     echo 'Could not find mention of class ' . class_name . ' under ' . spec_dir
