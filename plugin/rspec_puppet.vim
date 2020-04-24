@@ -57,9 +57,12 @@ function! s:Run_Rspec_Cmd(location)
     return
   endif
 
+  " This is to prevent seeing the 'Hit ENTER to continue' message
+  set cmdheight=2
   " Run the rspec tests
   exe "silent! normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
   call s:Cd_back()
+  set cmdheight=1
 endfunction
 
 " Returns names of one or more files that test ('describe' in rspec speak) a
