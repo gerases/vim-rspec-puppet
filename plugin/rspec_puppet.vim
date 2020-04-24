@@ -50,7 +50,7 @@ function! s:Run_Rspec_Cmd(location)
   endif
 
   " Save the file
-  exe "normal :w\<CR>"
+  exe "silent! normal :w\<CR>"
 
   if has('terminal') == 0
     echo "No terminal support in this version of vim. Aborting"
@@ -58,7 +58,7 @@ function! s:Run_Rspec_Cmd(location)
   endif
 
   " Run the rspec tests
-  exe "normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
+  exe "silent! normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
   call s:Cd_back()
 endfunction
 
@@ -169,7 +169,7 @@ function! s:Find_And_Run_Spec_File()
   let specs = system("rg -lg '*_spec.rb' " . class_name)
   " Grep for the class name under the spec dir
   if empty(specs)
-    echo 'Could not find mention of class ' . class_name . ' under ' . spec_dir
+    echo 'Could not find mention of class ' . class_name
   else
     " In almost all cases the class we're testing should only have one
     " file, but if there are several, Run_Rspec_Cmd will call them all.
