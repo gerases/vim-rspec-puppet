@@ -57,12 +57,22 @@ function! s:Run_Rspec_Cmd(location)
     return
   endif
 
-  " This is to prevent seeing the 'Hit ENTER to continue' message
-  set cmdheight=2
   " Run the rspec tests
+
+  " This is to prevent seeing the 'Hit ENTER to continue' message
+  let l:cmdheight_val = &cmdheight
+  set cmdheight=2
   exe "silent! normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
   call s:Cd_back()
+
+  " Restore cmdheight in the shell tab
+  let l:current_tab = tabpagenr()
+  exe 'normal ' . (l:current_tab + 1) . 'gt'
   set cmdheight=1
+  " Restore cmdheight in the tab that initiated this
+  " test, which we assume is in the next tab (current tab + 1)
+  exe 'normal ' . l:current_tab . 'gt'
+  exe 'set cmdheight=' . l:cmdheight_val
 endfunction
 
 " Returns names of one or more files that test ('describe' in rspec speak) a
@@ -236,6 +246,9 @@ function! Run_Spec(...)
     endif
     call s:Run_Rspec_Cmd(l:location)
   endif
+  " Restore the original value
+  exe "set cmdheight=1"
+  redraw!
 endfunction
 
 function! Run_Spec_Line()
