@@ -129,7 +129,7 @@ function! s:Find_Nearest_Spec_Dir()
   return 1
 endfunction
 
-function! s:Find_And_Run_Spec_File()
+function! s:Find_Spec_File()
   if s:Find_Nearest_Spec_Dir() != 1
     return
   endif
@@ -154,8 +154,7 @@ function! s:Find_And_Run_Spec_File()
   for variant in [ spec_path_base_1, spec_path_base_2, spec_path_base_3 ]
     let full_path = join(variant, '/') . '_spec.rb'
     if filereadable(full_path)
-      call s:Run_Rspec_Cmd(full_path)
-      return
+      return full_path
     endif
   endfor
 
@@ -184,11 +183,20 @@ function! s:Find_And_Run_Spec_File()
   if empty(specs)
     echo 'Could not find mention of class ' . class_name
   else
-    " In almost all cases the class we're testing should only have one
-    " file, but if there are several, Run_Rspec_Cmd will call them all.
-    call s:Run_Rspec_Cmd(split(specs, "\n"))
+    let l:spec = split(specs, "\n")
+    " If we have more than one spec found, treat it as an error
+    if len(l:specs) > 1
+      echo "More than one spec found"
+      return
+    endif
+    return l:spec
   endif
 
+  call s:Cd_back()
+endfunction
+
+function! s:Run_Spec_File()
+  call s:Run_Rspec_Cmd(s:Find_Spec_File())
   call s:Cd_back()
 endfunction
 
@@ -215,6 +223,20 @@ endfunction
 " =================
 " Global functions
 " =================
+function! Open_Spec_File()
+  if matchstr(expand('%:p'), '[.]pp$') == ""
+    echo "Not a puppet file"
+    return
+  endif
+  let s:old_path = getcwd()
+  let s:cd_back  = 'cd ' . s:old_path
+  let s:result = s:Find_Spec_File()
+  if s:result == ''
+    return
+  endif
+  execute 'tabedit' s:result
+endfunction
+
 function! Run_Spec(...)
   let s:old_path = getcwd()
   let s:cd_back  = 'cd ' . s:old_path
@@ -234,7 +256,7 @@ function! Run_Spec(...)
 
   if l:buffer_type == 1
     " It's a puppet manifest - try to find the matching spec file.
-    call s:Find_And_Run_Spec_File()
+    call s:Run_Spec_File()
   else
     let l:location = expand('%:p')
     " We have a spec file - run it directly.
