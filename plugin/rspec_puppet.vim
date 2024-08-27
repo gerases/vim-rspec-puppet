@@ -80,7 +80,7 @@ endfunction
 function! s:Find_Spec_File_From_Puppet_Manifest()
   " Search for the word 'class' wrapping the search if necessary and not
   " moving the cursor.
-  let line_no = search('^class', 'wn')
+  let line_no = search('^class\|^define', 'wn')
   if line_no == 0
     return
   endif
@@ -88,7 +88,7 @@ function! s:Find_Spec_File_From_Puppet_Manifest()
   let line_contents = getline(line_no)
 
   " Extract the name of the class
-  let class_name = matchstr(line_contents, 'class \zs[a-zA-Z0-9_:]\+\ze')
+  let class_name = matchstr(line_contents, '^\(class\|define\) \zs[a-zA-Z0-9_:]\+\ze')
   if class_name == ''
     return
   endif
@@ -150,9 +150,13 @@ function! s:Find_Spec_File()
   let spec_path_base_2 = ['spec', 'classes', join(class_name_pieces, '/')]
   " spec/classes/<ALL_CLASS_NAME_PIECES_EXCEPT_FIRST>_spec.rb
   let spec_path_base_3 = ['spec', 'classes', join(class_name_pieces[1:-1], '/')]
+  " spec/defines/<ALL_DEFINE_NAME_PIECES_EXCEPT_FIRST>_spec.rb
+  let spec_path_base_4 = ['spec', 'defines', join(class_name_pieces[1:-1], '/')]
 
-  for variant in [ spec_path_base_1, spec_path_base_2, spec_path_base_3 ]
+  " echo "Class is "  . class_name
+  for variant in [ spec_path_base_1, spec_path_base_2, spec_path_base_3, spec_path_base_4 ]
     let full_path = join(variant, '/') . '_spec.rb'
+    " echom "Trying " . full_path
     if filereadable(full_path)
       return full_path
     endif
