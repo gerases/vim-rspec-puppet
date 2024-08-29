@@ -153,7 +153,6 @@ function! s:Find_Spec_File()
   " spec/defines/<ALL_DEFINE_NAME_PIECES_EXCEPT_FIRST>_spec.rb
   let spec_path_base_4 = ['spec', 'defines', join(class_name_pieces[1:-1], '/')]
 
-  " echo "Class is "  . class_name
   for variant in [ spec_path_base_1, spec_path_base_2, spec_path_base_3, spec_path_base_4 ]
     let full_path = join(variant, '/') . '_spec.rb'
     " echom "Trying " . full_path
@@ -170,32 +169,27 @@ function! s:Find_Spec_File()
     return
   endif
 
-  call inputsave()
-  let yes = (input('Could not find spec file. Grep spec dir? (y/N) ') =~? '^y')
-  call inputrestore()
-  if !yes
+  let l:rg_search = system('rg -l --color=never -- ^describe.*' . class_name . '[^:]')
+  let l:specs = split(l:rg_search, "\n")
+  if len(l:specs) == 0
+    echo "Nothing found"
     call s:Cd_back()
     return
   endif
 
-  " Echo newline or next message (if any) will continue on the prompt line
-  " above
-  echo "\n"
-
-  let specs = system("rg -lg '*_spec.rb' " . class_name)
-  " Grep for the class name under the spec dir
-  if empty(specs)
-    echo 'Could not find mention of class ' . class_name
-  else
-    let l:spec = split(specs, "\n")
-    " If we have more than one spec found, treat it as an error
-    if len(l:specs) > 1
-      echo "More than one spec found"
-      return
-    endif
-    return l:spec
+  if len(l:specs) == 1
+    execute "tabedit " . specs[0]
+    call s:Cd_back()
+    return
   endif
 
+  let options = {
+      \ 'options': ['--prompt', 'Spec> ', '--preview', 'cat {}'],
+      \ 'source': l:specs,
+      \ 'window' : { 'height': '20%', 'width': '100%' },
+      \ 'sink': 'tabedit',
+      \ }
+  call fzf#run(fzf#wrap(options))
   call s:Cd_back()
 endfunction
 
