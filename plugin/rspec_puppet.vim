@@ -52,7 +52,7 @@ function! s:Run_Rspec_Cmd(location)
   " Save the file
   exe "silent! normal :w\<CR>"
 
-  if has('terminal') == 0
+  if has('nvim') == 0 && has('terminal') == 0
     echo "No terminal support in this version of vim. Aborting"
     return
   endif
