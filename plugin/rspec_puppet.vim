@@ -96,6 +96,28 @@ function! s:Find_Spec_File_From_Puppet_Manifest()
   return class_name
 endfunction
 
+" Returns the manifest path (relative to the module root) for a spec file
+" by parsing the describe line to extract the fully-qualified class name.
+function! s:Find_Manifest_From_Spec()
+  let line_no = search('^describe', 'wn')
+  if line_no == 0
+    return ''
+  endif
+
+  let line_contents = getline(line_no)
+  let class_name = matchstr(line_contents, '^describe\s*[''"]\zs[^''"]\+\ze')
+  if class_name == ''
+    return ''
+  endif
+
+  let parts = split(class_name, '::')
+  if len(parts) == 1
+    return 'manifests/init.pp'
+  else
+    return 'manifests/' . join(parts[1:], '/') . '.pp'
+  endif
+endfunction
+
 function! s:Find_Nearest_Spec_Dir()
   " Cd to the directory of the file so we can search upward
   " :h removes the last component of the path
@@ -240,6 +262,35 @@ function! Open_Spec_File()
     return
   endif
   execute 'tabedit' s:result
+endfunction
+
+function! Open_Manifest_File()
+  if matchstr(expand('%:p'), '_spec.rb$') == ""
+    echo "Not a spec file"
+    return
+  endif
+  let s:old_path = getcwd()
+  let s:cd_back  = 'cd ' . s:old_path
+
+  if s:Find_Nearest_Spec_Dir() != 1
+    return
+  endif
+
+  let l:manifest_path = s:Find_Manifest_From_Spec()
+  if empty(l:manifest_path)
+    echo "Could not determine the manifest path from the spec file"
+    call s:Cd_back()
+    return
+  endif
+
+  if !filereadable(l:manifest_path)
+    echo "Manifest not found: " . l:manifest_path
+    call s:Cd_back()
+    return
+  endif
+
+  execute 'tabedit' l:manifest_path
+  call s:Cd_back()
 endfunction
 
 function! Run_Spec(...)
