@@ -50,6 +50,12 @@ describe "Rspec Runner"
     Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/a_module_spec.rb'
   end
 
+  it "works from within a component-module init.pp when spec is named init_spec.rb"
+    silent edit b_module/manifests/init.pp
+    call Call('Run_Spec')
+    Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/init_spec.rb'
+  end
+
   it "works from within a 1-level-deep profile manifest"
     silent edit profile/manifests/a.pp
     call Call('Run_Spec')

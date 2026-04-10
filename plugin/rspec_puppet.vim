@@ -153,7 +153,14 @@ function! s:Find_Spec_File()
   " spec/defines/<ALL_DEFINE_NAME_PIECES_EXCEPT_FIRST>_spec.rb
   let spec_path_base_4 = ['spec', 'defines', join(class_name_pieces[1:-1], '/')]
 
-  for variant in [ spec_path_base_1, spec_path_base_2, spec_path_base_3, spec_path_base_4 ]
+  let l:variants = [ spec_path_base_1, spec_path_base_2, spec_path_base_3, spec_path_base_4 ]
+
+  " For init.pp manifests, also try spec/classes/init_spec.rb
+  if expand('%:t') == 'init.pp'
+    call add(l:variants, ['spec', 'classes', 'init'])
+  endif
+
+  for variant in l:variants
     let full_path = join(variant, '/') . '_spec.rb'
     " echom "Trying " . full_path
     if filereadable(full_path)

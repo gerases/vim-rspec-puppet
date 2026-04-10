@@ -1,0 +1,4 @@
+class b_module {
+
+
+}
