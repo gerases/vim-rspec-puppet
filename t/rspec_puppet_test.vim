@@ -68,3 +68,29 @@ describe "Rspec Runner"
     Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/b/c/d_spec.rb'
   end
 end
+
+describe "Spec to manifest"
+  let g:repo_root = getcwd()
+  let g:modules_dir = g:repo_root . '/t/data/modules'
+  exe 'cd ' . g:modules_dir
+
+  after
+    close!
+    Expect getcwd() == g:modules_dir
+  end
+
+  it "finds init.pp for a single-segment class"
+    silent edit a_module/spec/classes/a_module_spec.rb
+    Expect Call("s:Find_Manifest_From_Spec") == 'manifests/init.pp'
+  end
+
+  it "finds the manifest for a multi-segment class"
+    silent edit profile/spec/classes/a_spec.rb
+    Expect Call("s:Find_Manifest_From_Spec") == 'manifests/a.pp'
+  end
+
+  it "finds the manifest for a deeply nested class"
+    silent edit profile/spec/classes/b/c/d_spec.rb
+    Expect Call("s:Find_Manifest_From_Spec") == 'manifests/b/c/d.pp'
+  end
+end
