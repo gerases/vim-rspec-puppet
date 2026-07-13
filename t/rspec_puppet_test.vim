@@ -26,6 +26,54 @@ describe "Class name extractor"
 
     Expect Call("s:Find_Spec_File_From_Puppet_Manifest") == 'parent::child::grandchild'
   end
+
+  it "extracts a define name"
+    new
+    put =[
+    \   'define mymod::my_define (',
+    \ ]
+
+    Expect Call("s:Find_Spec_File_From_Puppet_Manifest") == 'mymod::my_define'
+  end
+
+  it "ignores indented class keywords"
+    new
+    put =[
+    \   '  class { somepackage:',
+    \   '    ensure => installed,',
+    \   '  }',
+    \ ]
+
+    Expect empty(Call("s:Find_Spec_File_From_Puppet_Manifest")) to_be_true
+  end
+end
+
+describe "Find_Module_Root"
+  exe 'cd ' . g:modules_dir
+
+  after
+    Expect getcwd() == g:modules_dir
+  end
+
+  it "finds module root from a manifest file"
+    silent edit a_module/manifests/init.pp
+    Expect Call("s:Find_Module_Root") == g:modules_dir . '/a_module'
+  end
+
+  it "finds module root from a spec file"
+    silent edit a_module/spec/classes/a_module_spec.rb
+    Expect Call("s:Find_Module_Root") == g:modules_dir . '/a_module'
+  end
+
+  it "finds module root from a deeply nested manifest"
+    silent edit profile/manifests/b/c/d.pp
+    Expect Call("s:Find_Module_Root") == g:modules_dir . '/profile'
+  end
+
+  it "finds module root from a deeply nested spec"
+    silent edit profile/spec/classes/b/c/d_spec.rb
+    Expect Call("s:Find_Module_Root") == g:modules_dir . '/profile'
+  end
 end
 
 describe "Rspec Runner"
@@ -66,6 +114,31 @@ describe "Rspec Runner"
     call Call('Run_Spec')
     Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/profile/spec/classes/b/c/d_spec.rb'
   end
+
+  it "works from within a define type manifest"
+    silent edit profile/manifests/my_define.pp
+    call Call('Run_Spec')
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/profile/spec/defines/my_define_spec.rb'
+  end
+
+  it "appends line number when Run_Spec_Line is used"
+    silent edit a_module/spec/classes/a_module_spec.rb
+    3
+    call Call('Run_Spec_Line')
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/a_module/spec/classes/a_module_spec.rb:3'
+  end
+
+  it "uses --fail-fast flag"
+    silent edit a_module/manifests/init.pp
+    call Call('Run_Spec')
+    Expect Ref("s:rspec_command") =~ '--fail-fast'
+  end
+
+  it "uses -fd formatter"
+    silent edit a_module/manifests/init.pp
+    call Call('Run_Spec')
+    Expect Ref("s:rspec_command") =~ '-fd'
+  end
 end
 
 describe "Spec to manifest"
@@ -89,5 +162,34 @@ describe "Spec to manifest"
   it "finds the manifest for a deeply nested class"
     silent edit profile/spec/classes/b/c/d_spec.rb
     Expect Call("s:Find_Manifest_From_Spec") == 'manifests/b/c/d.pp'
+  end
+
+  it "returns empty string when no describe line exists"
+    new
+    put =['# just a comment']
+    Expect Call("s:Find_Manifest_From_Spec") == ''
+    close!
+  end
+end
+
+describe "Buffer type detection"
+  after
+    enew!
+  end
+
+  it "returns 1 for puppet manifests"
+    silent edit a_module/manifests/init.pp
+    Expect Call("s:Get_Buf_Type") == 1
+  end
+
+  it "returns 2 for spec files"
+    silent edit a_module/spec/classes/a_module_spec.rb
+    Expect Call("s:Get_Buf_Type") == 2
+  end
+
+  it "returns 0 for other files"
+    new
+    Expect Call("s:Get_Buf_Type") == 0
+    close!
   end
 end
