@@ -28,11 +28,26 @@ function! s:FindAndCloseLastTerminalWindow()
   exe 'normal ' . l:current_tab . 'gt'
 endfunction
 
-function! s:Cd_back()
-  exec s:cd_back
+function! s:Find_Module_Root()
+  let l:dir = expand('%:p:h')
+  let l:git_root = systemlist('git -C ' . shellescape(l:dir) . ' rev-parse --show-toplevel')
+  let l:stop_at = v:shell_error == 0 ? l:git_root[0] : expand('~')
+
+  while 1
+    if isdirectory(l:dir . '/spec')
+      return l:dir
+    endif
+    let l:parent = fnamemodify(l:dir, ':h')
+    if l:dir ==# l:stop_at || l:parent ==# l:dir
+      break
+    endif
+    let l:dir = l:parent
+  endwhile
+
+  return ''
 endfunction
 
-function! s:Run_Rspec_Cmd(location)
+function! s:Run_Rspec_Cmd(location, module_root)
   call s:FindAndCloseLastTerminalWindow()
 
   " If a list of paths was passed, turn it into a space separated string
@@ -45,11 +60,9 @@ function! s:Run_Rspec_Cmd(location)
 
   if exists("s:test_mode")
     let s:rspec_command = 'rspec -fd --fail-fast ' . l:spec_paths
-    call s:Cd_back()
     return
   endif
 
-  " Save the file
   exe "silent! normal :w\<CR>"
 
   if has('nvim') == 0 && has('terminal') == 0
@@ -57,20 +70,14 @@ function! s:Run_Rspec_Cmd(location)
     return
   endif
 
-  " Run the rspec tests
-
-  " This is to prevent seeing the 'Hit ENTER to continue' message
   let l:cmdheight_val = &cmdheight
   set cmdheight=2
-  exe "silent! normal :-tab terminal rspec -fd --fail-fast " . l:spec_paths . "\<CR>"
-  call s:Cd_back()
+  silent! exe '-tabnew'
+  call term_start('rspec -fd --fail-fast ' . l:spec_paths, {'curwin': 1, 'cwd': a:module_root})
 
-  " Restore cmdheight in the shell tab
   let l:current_tab = tabpagenr()
   exe 'normal ' . (l:current_tab + 1) . 'gt'
   set cmdheight=1
-  " Restore cmdheight in the tab that initiated this
-  " test, which we assume is in the next tab (current tab + 1)
   exe 'normal ' . l:current_tab . 'gt'
   exe 'set cmdheight=' . l:cmdheight_val
 endfunction
@@ -118,98 +125,48 @@ function! s:Find_Manifest_From_Spec()
   endif
 endfunction
 
-function! s:Find_Nearest_Spec_Dir()
-  " Cd to the directory of the file so we can search upward
-  " :h removes the last component of the path
-  cd %:h
-
-  " Holds the path to a directory beyond which the search should not continue
-  let l:stop_search_at = ""
-
-  call system('which git')
-  if v:shell_error == 0
-    let l:stop_search_at = system('git rev-parse --show-toplevel')
-  endif
-
-  " If we don't have a repo root, default to home dir
-  if l:stop_search_at == ""
-    let l:stop_search_at = '~'
-  endif
-
-  " Find the closest spec dir upward of the file until
-  " the directory in stop_search_at.
-  let spec_dir = finddir('spec', ';' . l:stop_search_at)
-  if empty(spec_dir)
-    echo "Couldn't find a spec dir"
-    call s:Cd_back()
-    return
-  endif
-
-  " Cd to the found spec dir's parent so that we're at the same level as the
-  " spec dir
-  exe 'cd ' . spec_dir . '/..'
-  return 1
-endfunction
-
-function! s:Find_Spec_File()
-  if s:Find_Nearest_Spec_Dir() != 1
-    return
-  endif
-
-  " Try to get the spec files that test this class.
+function! s:Find_Spec_File(module_root)
   let class_name = s:Find_Spec_File_From_Puppet_Manifest()
   if empty(class_name)
     echo 'Could not determine the class name in ' . expand('%:p')
-    call s:Cd_back()
-    return
+    return ''
   end
 
   let class_name_pieces = split(class_name, '::')
-  " Construct the expected spec file path which could be:
-  " spec/classes/<CLASS_NAME>_spec.rb
-  let spec_path_base_1 = ['spec', 'classes', class_name]
-  " spec/classes/<ALL_CLASS_NAME_PIECES>_spec.rb
-  let spec_path_base_2 = ['spec', 'classes', join(class_name_pieces, '/')]
-  " spec/classes/<ALL_CLASS_NAME_PIECES_EXCEPT_FIRST>_spec.rb
-  let spec_path_base_3 = ['spec', 'classes', join(class_name_pieces[1:-1], '/')]
-  " spec/defines/<ALL_DEFINE_NAME_PIECES_EXCEPT_FIRST>_spec.rb
-  let spec_path_base_4 = ['spec', 'defines', join(class_name_pieces[1:-1], '/')]
+  let l:variants = [
+      \ ['spec', 'classes', class_name],
+      \ ['spec', 'classes', join(class_name_pieces, '/')],
+      \ ['spec', 'classes', join(class_name_pieces[1:-1], '/')],
+      \ ['spec', 'defines', join(class_name_pieces[1:-1], '/')],
+      \ ]
 
-  let l:variants = [ spec_path_base_1, spec_path_base_2, spec_path_base_3, spec_path_base_4 ]
-
-  " For init.pp manifests, also try spec/classes/init_spec.rb
   if expand('%:t') == 'init.pp'
     call add(l:variants, ['spec', 'classes', 'init'])
   endif
 
   for variant in l:variants
-    let full_path = join(variant, '/') . '_spec.rb'
-    " echom "Trying " . full_path
-    if filereadable(full_path)
-      return full_path
+    let l:rel_path = join(variant, '/') . '_spec.rb'
+    let l:abs_path = a:module_root . '/' . l:rel_path
+    if filereadable(l:abs_path)
+      return l:abs_path
     endif
   endfor
 
-  " If the above fails, we can try to grep with rg
   let rg_exists = system('which rg')
   if v:shell_error != 0
     echo "Can't find the 'rg' binary in the binary paths"
-    call s:Cd_back()
-    return
+    return ''
   endif
 
-  let l:rg_search = system('rg -l --color=never -- ^describe.*' . class_name . '[^:]')
+  let l:rg_search = system('rg -l --color=never -- "^describe.*' . class_name . '[^:]" ' . shellescape(a:module_root))
   let l:specs = split(l:rg_search, "\n")
   if len(l:specs) == 0
     echo "Nothing found"
-    call s:Cd_back()
-    return
+    return ''
   endif
 
   if len(l:specs) == 1
-    execute "tabedit " . specs[0]
-    call s:Cd_back()
-    return
+    return l:specs[0]
   endif
 
   let options = {
@@ -219,12 +176,14 @@ function! s:Find_Spec_File()
       \ 'sink': 'tabedit',
       \ }
   call fzf#run(fzf#wrap(options))
-  call s:Cd_back()
+  return ''
 endfunction
 
-function! s:Run_Spec_File()
-  call s:Run_Rspec_Cmd(s:Find_Spec_File())
-  call s:Cd_back()
+function! s:Run_Spec_File(module_root)
+  let l:spec = s:Find_Spec_File(a:module_root)
+  if !empty(l:spec)
+    call s:Run_Rspec_Cmd(l:spec, a:module_root)
+  endif
 endfunction
 
 function! s:Get_Buf_Type()
@@ -255,13 +214,18 @@ function! Open_Spec_File()
     echo "Not a puppet file"
     return
   endif
-  let s:old_path = getcwd()
-  let s:cd_back  = 'cd ' . s:old_path
-  let s:result = s:Find_Spec_File()
-  if s:result == ''
+
+  let l:module_root = s:Find_Module_Root()
+  if empty(l:module_root)
+    echo "Couldn't find a spec dir"
     return
   endif
-  execute 'tabedit' s:result
+
+  let l:spec = s:Find_Spec_File(l:module_root)
+  if empty(l:spec)
+    return
+  endif
+  execute 'tabedit' l:spec
 endfunction
 
 function! Open_Manifest_File()
@@ -269,62 +233,50 @@ function! Open_Manifest_File()
     echo "Not a spec file"
     return
   endif
-  let s:old_path = getcwd()
-  let s:cd_back  = 'cd ' . s:old_path
 
-  if s:Find_Nearest_Spec_Dir() != 1
+  let l:module_root = s:Find_Module_Root()
+  if empty(l:module_root)
+    echo "Couldn't find a spec dir"
     return
   endif
 
   let l:manifest_path = s:Find_Manifest_From_Spec()
   if empty(l:manifest_path)
     echo "Could not determine the manifest path from the spec file"
-    call s:Cd_back()
     return
   endif
 
-  if !filereadable(l:manifest_path)
-    echo "Manifest not found: " . l:manifest_path
-    call s:Cd_back()
+  let l:abs_path = l:module_root . '/' . l:manifest_path
+  if !filereadable(l:abs_path)
+    echo "Manifest not found: " . l:abs_path
     return
   endif
 
-  execute 'tabedit' l:manifest_path
-  call s:Cd_back()
+  execute 'tabedit' l:abs_path
 endfunction
 
 function! Run_Spec(...)
-  let s:old_path = getcwd()
-  let s:cd_back  = 'cd ' . s:old_path
-
   let l:buffer_type = s:Get_Buf_Type()
   if l:buffer_type == 0
     echo "Not a puppet or rspec file"
     return
   endif
 
-  " Find the nearest spec dir and cd to its parent.
-  " This needs to be done for both puppet manifests
-  " and spec files.
-  if s:Find_Nearest_Spec_Dir() != 1
+  let l:module_root = s:Find_Module_Root()
+  if empty(l:module_root)
+    echo "Couldn't find a spec dir"
     return
   endif
 
   if l:buffer_type == 1
-    " It's a puppet manifest - try to find the matching spec file.
-    call s:Run_Spec_File()
+    call s:Run_Spec_File(l:module_root)
   else
     let l:location = expand('%:p')
-    " We have a spec file - run it directly.
     if a:0 > 0
-      " If we have a line number in the arguments, append it
-      " to the spec file name. Rspec will then run tests
-      " only for that line number.
       let l:location = l:location . ':' . a:1
     endif
-    call s:Run_Rspec_Cmd(l:location)
+    call s:Run_Rspec_Cmd(l:location, l:module_root)
   endif
-  " Restore the original value
   exe "set cmdheight=1"
   redraw!
 endfunction

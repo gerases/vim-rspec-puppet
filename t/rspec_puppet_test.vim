@@ -1,6 +1,9 @@
 source plugin/rspec_puppet.vim
 call vspec#hint({"scope": "rspec_puppet#scope()", "sid": "rspec_puppet#sid()"})
 
+let g:repo_root = getcwd()
+let g:modules_dir = g:repo_root . '/t/data/modules'
+
 describe "Class name extractor"
   after
    close!
@@ -26,15 +29,11 @@ describe "Class name extractor"
 end
 
 describe "Rspec Runner"
-  let g:repo_root = getcwd()
-  let g:modules_dir = g:repo_root . '/t/data/modules'
   exe 'cd ' . g:modules_dir
 
   call Call("s:turn_on_test_mode")
 
   after
-    " Ensure we're always back in the original directory after a given test
-    " was run
     Expect getcwd() == g:modules_dir
   end
 
@@ -47,35 +46,33 @@ describe "Rspec Runner"
   it "works from within a component-module puppet file"
     silent edit a_module/manifests/init.pp
     call Call('Run_Spec')
-    Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/a_module_spec.rb'
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/a_module/spec/classes/a_module_spec.rb'
   end
 
   it "works from within a component-module init.pp when spec is named init_spec.rb"
     silent edit b_module/manifests/init.pp
     call Call('Run_Spec')
-    Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/init_spec.rb'
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/b_module/spec/classes/init_spec.rb'
   end
 
   it "works from within a 1-level-deep profile manifest"
     silent edit profile/manifests/a.pp
     call Call('Run_Spec')
-    Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/a_spec.rb'
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/profile/spec/classes/a_spec.rb'
   end
 
   it "works from within a 3-level-deep profile manifest"
     silent edit profile/manifests/b/c/d.pp
     call Call('Run_Spec')
-    Expect Ref("s:rspec_command") =~ 'rspec.* spec/classes/b/c/d_spec.rb'
+    Expect Ref("s:rspec_command") =~ 'rspec.* ' . g:modules_dir . '/profile/spec/classes/b/c/d_spec.rb'
   end
 end
 
 describe "Spec to manifest"
-  let g:repo_root = getcwd()
-  let g:modules_dir = g:repo_root . '/t/data/modules'
   exe 'cd ' . g:modules_dir
 
   after
-    close!
+    enew!
     Expect getcwd() == g:modules_dir
   end
 
